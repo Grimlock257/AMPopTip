@@ -961,16 +961,58 @@ open class PopTipOverlayView: UIView {
 
   public weak var popTip: PopTip?
 
-  open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-    let hitView = super.hitTest(point, with: event)
-
-    guard let popTip = popTip, popTip.shouldForwardCutoutAreaInteraction && popTip.shouldConsiderCutoutTapSeparately && popTip.shouldShowMask && popTip.shouldCutoutMask else { return hitView }
-
-    if let hitView = hitView, popTip.cutoutPathGenerator(popTip.from).contains(point) {
-      popTip.hide()
-      return nil
+    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        var hitView = super.hitTest(point, with: event)
+        print("running hitTest against \(hitView), is self \(hitView === self)")
+        
+        guard let popTip = popTip, popTip.shouldForwardCutoutAreaInteraction && popTip.shouldConsiderCutoutTapSeparately && popTip.shouldShowMask && popTip.shouldCutoutMask && self === hitView else {
+            print("returning via guard")
+            return hitView
+        }
+        
+        if popTip.cutoutPathGenerator(popTip.from).contains(point) {
+            self.isUserInteractionEnabled = false
+            hitView = super.hitTest(point, with: event)
+            self.isUserInteractionEnabled = true
+            popTip.hide()
+        } else {
+            print("doesn't contain point")
+        }
+        
+        return hitView
+////        isUserInteractionEnabled = popTip!.shouldForwardCutoutAreaInteraction
+//        var hitView = super.hitTest(point, with: event)
+//
+//        guard let popTip = popTip, popTip.shouldForwardCutoutAreaInteraction && popTip.shouldConsiderCutoutTapSeparately && popTip.shouldShowMask && popTip.shouldCutoutMask else {
+//            return hitView
+//        }
+//
+//        print("self vs hitView: \(self) vs \(hitView)")
+//
+//
+//        if self === hitView {
+//
+//            if popTip.cutoutPathGenerator(popTip.from).contains(point) {
+//                print("hiding...")
+//                popTip.hide()
+//                hitView = nil
+//            }
+//        } else {
+//            print("nil")
+//        }
+//
+//        isUserInteractionEnabled = !popTip.shouldForwardCutoutAreaInteraction
+//
+//        return hitView
     }
-
-    return hitView
-  }
+    
+//    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        let touch = touches.first
+//        let location = touch?.location(in: self)
+//        print("hello")
+////        self.label1.userInteractionEnabled = false
+////        let view = self.view.hitTest(location!, withEvent: nil) as? UILabel
+////        print(view?.text)
+////        self.label1.userInteractionEnabled = true
+//    }
 }

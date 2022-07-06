@@ -96,6 +96,8 @@ class ViewController: UIViewController {
 
   @IBAction func action(sender: UIButton) {
     guard let button = ButtonType(rawValue: sender.tag) else { return }
+    
+    print("button tapped")
 
     timer?.invalidate()
     

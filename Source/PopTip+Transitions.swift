@@ -157,6 +157,12 @@ public extension PopTip {
     cutoutView.layer.mask = cutoutShapeMaskLayer
     cutoutView.clipsToBounds = true
     cutoutView.backgroundColor = maskColor
+      
+//    print("!shouldForwardCutoutAreaInteraction value is \(!shouldForwardCutoutAreaInteraction)")
+
+//    cutoutView.isUserInteractionEnabled = !shouldForwardCutoutAreaInteraction
+//    backgroundMask.isUserInteractionEnabled = !shouldForwardCutoutAreaInteraction
+      cutoutView.isUserInteractionEnabled = false
 
     backgroundMask.addSubview(cutoutView)
   }
