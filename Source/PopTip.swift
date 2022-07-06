@@ -974,7 +974,11 @@ open class PopTipOverlayView: UIView {
             self.isUserInteractionEnabled = false
             hitView = super.hitTest(point, with: event)
             self.isUserInteractionEnabled = true
-            popTip.hide()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                popTip.hide()
+            })
+//            popTip.hide()
+            // maybe need to set some flag to pass through to the hide so it can run in the completion?
         } else {
             print("doesn't contain point")
         }
