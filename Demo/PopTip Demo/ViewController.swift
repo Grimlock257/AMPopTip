@@ -36,13 +36,24 @@ class ViewController: UIViewController {
     super.viewDidLoad()
 
     popTip.font = UIFont(name: "Avenir-Medium", size: 12)!
+    popTip.cornerRadius = 1
+    popTip.actionAnimation = .none
+    popTip.shouldShowMask = true
+    popTip.shouldCutoutMask = true
     popTip.shouldDismissOnTap = true
     popTip.shouldDismissOnTapOutside = true
     popTip.shouldDismissOnSwipeOutside = true
+    popTip.shouldConsiderCutoutTapSeparately = true
+    popTip.shouldForwardCutoutAreaInteraction = true
     popTip.edgeMargin = 5
     popTip.offset = 2
     popTip.bubbleOffset = 0
     popTip.edgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+    popTip.cutoutPathGenerator = { from in
+      let length = (from.width < from.height ? from.width : from.height)
+      let rect = CGRect(x: (from.minX + from.width / 2) - (length/2), y: (from.minY + from.height / 2) - (length/2), width: length, height: length)
+      return UIBezierPath(ovalIn: rect.insetBy(dx: -8, dy: -8))
+    }
     
     /*
      Other customization:
@@ -54,7 +65,7 @@ class ViewController: UIViewController {
 //    popTip.shadowOffset = CGSize(width: 1, height: 1)
 //    popTip.shadowColor = .black
     
-    popTip.actionAnimation = .bounce(8)
+//    popTip.actionAnimation = .bounce(8)
 //    popTip.actionAnimation = .pulse(1.1)
 
     popTip.tapHandler = { _ in
@@ -63,6 +74,10 @@ class ViewController: UIViewController {
 
     popTip.tapOutsideHandler = { _ in
       print("tap outside")
+    }
+    
+    popTip.tapCutoutHandler = { _ in
+      print("tap cutout")
     }
 
     popTip.swipeOutsideHandler = { _ in

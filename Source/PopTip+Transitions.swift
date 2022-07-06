@@ -24,12 +24,14 @@ public extension PopTip {
     case .custom:
       if let backgroundMask = backgroundMask {
         containerView?.addSubview(backgroundMask)
+        addOverlayView()
       }
       containerView?.addSubview(self)
       entranceAnimationHandler?(completion)
     case .none:
       if let backgroundMask = backgroundMask {
         containerView?.addSubview(backgroundMask)
+        addOverlayView()
       }
       containerView?.addSubview(self)
       completion()
@@ -67,6 +69,7 @@ public extension PopTip {
     }
     if let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
+      addOverlayView()
     }
     containerView?.addSubview(self)
 
@@ -82,6 +85,7 @@ public extension PopTip {
     transform = CGAffineTransform(scaleX: 0, y: 0)
     if let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
+      addOverlayView()
     }
     containerView?.addSubview(self)
 
@@ -96,6 +100,7 @@ public extension PopTip {
   private func entranceFadeIn(completion: @escaping () -> Void) {
     if let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
+      addOverlayView()
     }
     containerView?.addSubview(self)
 
@@ -128,5 +133,31 @@ public extension PopTip {
     }) { (_) in
       completion()
     }
+  }
+    
+  private func addOverlayView() {
+
+    guard let backgroundMask = backgroundMask else { return }
+
+    guard shouldCutoutMask else {
+      backgroundMask.backgroundColor = maskColor
+      return
+    }
+
+    let cutoutView = UIView(frame: backgroundMask.bounds)
+    let cutoutShapeMaskLayer = CAShapeLayer()
+    let cutoutPath = cutoutPathGenerator(from)
+    let path = UIBezierPath(rect: backgroundMask.bounds)
+
+    path.append(cutoutPath)
+
+    cutoutShapeMaskLayer.path = path.cgPath
+    cutoutShapeMaskLayer.fillRule = .evenOdd
+
+    cutoutView.layer.mask = cutoutShapeMaskLayer
+    cutoutView.clipsToBounds = true
+    cutoutView.backgroundColor = maskColor
+
+    backgroundMask.addSubview(cutoutView)
   }
 }
