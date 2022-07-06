@@ -676,8 +676,10 @@ open class PopTip: UIView {
     containerView = view
     let controller = UIHostingController(rootView: rootView)
     controller.view.backgroundColor = .clear
-    controller.view.frame.size = controller.view.intrinsicContentSize
-    maxWidth = controller.view.frame.size.width
+    let size = CGSize(width: min(controller.view.intrinsicContentSize.width, parent.view.frame.width), height: min(controller.view.intrinsicContentSize.height, parent.view.frame.height))
+    controller.view.frame.size = size
+    let calculatedMaxWidth = size.width - edgeMargin - (padding * 2) - edgeInsets.horizontal
+    maxWidth = calculatedMaxWidth
     self.customView?.removeFromSuperview()
     self.customView = controller.view
     parent.addChild(controller)
