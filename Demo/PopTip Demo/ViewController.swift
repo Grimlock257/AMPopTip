@@ -36,15 +36,10 @@ class ViewController: UIViewController {
     super.viewDidLoad()
 
     popTip.font = UIFont(name: "Avenir-Medium", size: 12)!
-    popTip.cornerRadius = 1
-    popTip.actionAnimation = .none
-    popTip.shouldShowMask = true
-    popTip.shouldCutoutMask = true
     popTip.shouldDismissOnTap = true
     popTip.shouldDismissOnTapOutside = true
     popTip.shouldDismissOnSwipeOutside = true
     popTip.shouldConsiderCutoutTapSeparately = true
-    popTip.shouldForwardCutoutAreaInteraction = true
     popTip.edgeMargin = 5
     popTip.offset = 2
     popTip.bubbleOffset = 0
@@ -65,7 +60,7 @@ class ViewController: UIViewController {
 //    popTip.shadowOffset = CGSize(width: 1, height: 1)
 //    popTip.shadowColor = .black
     
-//    popTip.actionAnimation = .bounce(8)
+    popTip.actionAnimation = .bounce(8)
 //    popTip.actionAnimation = .pulse(1.1)
 
     popTip.tapHandler = { _ in
@@ -93,15 +88,24 @@ class ViewController: UIViewController {
   }
   
   var showSwiftUIView = false
+  var showMaskAndCutout = false
 
   @IBAction func action(sender: UIButton) {
     guard let button = ButtonType(rawValue: sender.tag) else { return }
-    
-    print("button tapped")
 
     timer?.invalidate()
     
     popTip.arrowRadius = 0
+    
+    switch button {
+    case .topRight:
+      showMaskAndCutout.toggle()
+      popTip.shouldShowMask = showMaskAndCutout
+      popTip.shouldCutoutMask = showMaskAndCutout
+    default:
+      popTip.shouldShowMask = false
+      popTip.shouldCutoutMask = false
+    }
     
     switch button {
     case .topLeft:

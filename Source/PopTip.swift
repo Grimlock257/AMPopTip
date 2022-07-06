@@ -203,8 +203,6 @@ open class PopTip: UIView {
   /// A boolean value that determines whether to consider the cutout area as separately to outside,
   /// i.e wether to call the `tapOutsideHandler` or the `tapCutoutHandler` when the tap occurs in the `from` frame.
   @objc open dynamic var shouldConsiderCutoutTapSeparately = false
-  /// A boolean value that determines whether to forward the user tap through the cut out area, if true and the user taps this area, the poptip will be dismissed as well as calling tapCutoutHandler
-  @objc open dynamic var shouldForwardCutoutAreaInteraction = false
   /// A boolean value that determines whether to dismiss when swiping outside the poptip.
   @objc open dynamic var shouldDismissOnSwipeOutside = false
   /// A boolean value that determines if the action animation should start automatically when the poptip is shown
@@ -247,7 +245,7 @@ open class PopTip: UIView {
   open private(set) var isAnimating: Bool = false
   /// The view that dims the background (including the button that triggered PopTip.
   /// The mask by appears with fade in effect only.
-  open private(set) var backgroundMask: PopTipOverlayView?
+  open private(set) var backgroundMask: UIView?
   /// The tap gesture recognizer. Read-only.
   open private(set) var tapGestureRecognizer: UITapGestureRecognizer?
   /// The tap remove gesture recognizer. Read-only.
@@ -513,8 +511,7 @@ open class PopTip: UIView {
       backgroundMask?.removeFromSuperview()
     } else {
       if backgroundMask == nil {
-        backgroundMask = PopTipOverlayView()
-        backgroundMask?.popTip = self
+        backgroundMask = UIView()
       }
       backgroundMask?.frame = containerView.bounds
     }
@@ -955,68 +952,4 @@ fileprivate extension UIEdgeInsets {
   var vertical: CGFloat {
     return self.top + self.bottom
   }
-}
-
-open class PopTipOverlayView: UIView {
-
-  public weak var popTip: PopTip?
-
-    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        var hitView = super.hitTest(point, with: event)
-        print("running hitTest against \(hitView), is self \(hitView === self)")
-        
-        guard let popTip = popTip, popTip.shouldForwardCutoutAreaInteraction && popTip.shouldConsiderCutoutTapSeparately && popTip.shouldShowMask && popTip.shouldCutoutMask && self === hitView else {
-            print("returning via guard")
-            return hitView
-        }
-        
-        if popTip.cutoutPathGenerator(popTip.from).contains(point) {
-            self.isUserInteractionEnabled = false
-            hitView = super.hitTest(point, with: event)
-            self.isUserInteractionEnabled = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                popTip.hide()
-            })
-//            popTip.hide()
-            // maybe need to set some flag to pass through to the hide so it can run in the completion?
-        } else {
-            print("doesn't contain point")
-        }
-        
-        return hitView
-////        isUserInteractionEnabled = popTip!.shouldForwardCutoutAreaInteraction
-//        var hitView = super.hitTest(point, with: event)
-//
-//        guard let popTip = popTip, popTip.shouldForwardCutoutAreaInteraction && popTip.shouldConsiderCutoutTapSeparately && popTip.shouldShowMask && popTip.shouldCutoutMask else {
-//            return hitView
-//        }
-//
-//        print("self vs hitView: \(self) vs \(hitView)")
-//
-//
-//        if self === hitView {
-//
-//            if popTip.cutoutPathGenerator(popTip.from).contains(point) {
-//                print("hiding...")
-//                popTip.hide()
-//                hitView = nil
-//            }
-//        } else {
-//            print("nil")
-//        }
-//
-//        isUserInteractionEnabled = !popTip.shouldForwardCutoutAreaInteraction
-//
-//        return hitView
-    }
-    
-//    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        let touch = touches.first
-//        let location = touch?.location(in: self)
-//        print("hello")
-////        self.label1.userInteractionEnabled = false
-////        let view = self.view.hitTest(location!, withEvent: nil) as? UILabel
-////        print(view?.text)
-////        self.label1.userInteractionEnabled = true
-//    }
 }

@@ -22,14 +22,14 @@ public extension PopTip {
     case .fadeIn:
       entranceFadeIn(completion: completion)
     case .custom:
-      if let backgroundMask = backgroundMask {
+      if shouldShowMask, let backgroundMask = backgroundMask {
         containerView?.addSubview(backgroundMask)
         addOverlayView()
       }
       containerView?.addSubview(self)
       entranceAnimationHandler?(completion)
     case .none:
-      if let backgroundMask = backgroundMask {
+      if shouldShowMask, let backgroundMask = backgroundMask {
         containerView?.addSubview(backgroundMask)
         addOverlayView()
       }
@@ -67,7 +67,7 @@ public extension PopTip {
       transform = transform.translatedBy(x: (containerView?.frame.width ?? 0) - from.origin.x, y: 0)
     case .auto, .autoHorizontal, .autoVertical: break // The decision will be made at this point
     }
-    if let backgroundMask = backgroundMask {
+    if shouldShowMask, let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
       addOverlayView()
     }
@@ -83,7 +83,7 @@ public extension PopTip {
 
   private func entranceScale(completion: @escaping () -> Void) {
     transform = CGAffineTransform(scaleX: 0, y: 0)
-    if let backgroundMask = backgroundMask {
+    if shouldShowMask, let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
       addOverlayView()
     }
@@ -98,7 +98,7 @@ public extension PopTip {
   }
 
   private func entranceFadeIn(completion: @escaping () -> Void) {
-    if let backgroundMask = backgroundMask {
+    if shouldShowMask, let backgroundMask = backgroundMask {
       containerView?.addSubview(backgroundMask)
       addOverlayView()
     }
@@ -157,12 +157,7 @@ public extension PopTip {
     cutoutView.layer.mask = cutoutShapeMaskLayer
     cutoutView.clipsToBounds = true
     cutoutView.backgroundColor = maskColor
-      
-//    print("!shouldForwardCutoutAreaInteraction value is \(!shouldForwardCutoutAreaInteraction)")
-
-//    cutoutView.isUserInteractionEnabled = !shouldForwardCutoutAreaInteraction
-//    backgroundMask.isUserInteractionEnabled = !shouldForwardCutoutAreaInteraction
-      cutoutView.isUserInteractionEnabled = false
+    cutoutView.isUserInteractionEnabled = false
 
     backgroundMask.addSubview(cutoutView)
   }
