@@ -22,16 +22,14 @@ public extension PopTip {
     case .fadeIn:
       entranceFadeIn(completion: completion)
     case .custom:
-      if shouldShowMask, let backgroundMask = backgroundMask {
-        containerView?.addSubview(backgroundMask)
-        addOverlayView()
+      if shouldShowMask {
+        addBackgroundMask(to: containerView)
       }
       containerView?.addSubview(self)
       entranceAnimationHandler?(completion)
     case .none:
-      if shouldShowMask, let backgroundMask = backgroundMask {
-        containerView?.addSubview(backgroundMask)
-        addOverlayView()
+      if shouldShowMask {
+        addBackgroundMask(to: containerView)
       }
       containerView?.addSubview(self)
       completion()
@@ -67,9 +65,8 @@ public extension PopTip {
       transform = transform.translatedBy(x: (containerView?.frame.width ?? 0) - from.origin.x, y: 0)
     case .auto, .autoHorizontal, .autoVertical: break // The decision will be made at this point
     }
-    if shouldShowMask, let backgroundMask = backgroundMask {
-      containerView?.addSubview(backgroundMask)
-      addOverlayView()
+    if shouldShowMask {
+      addBackgroundMask(to: containerView)
     }
     containerView?.addSubview(self)
 
@@ -83,9 +80,8 @@ public extension PopTip {
 
   private func entranceScale(completion: @escaping () -> Void) {
     transform = CGAffineTransform(scaleX: 0, y: 0)
-    if shouldShowMask, let backgroundMask = backgroundMask {
-      containerView?.addSubview(backgroundMask)
-      addOverlayView()
+    if shouldShowMask {
+      addBackgroundMask(to: containerView)
     }
     containerView?.addSubview(self)
 
@@ -98,9 +94,8 @@ public extension PopTip {
   }
 
   private func entranceFadeIn(completion: @escaping () -> Void) {
-    if shouldShowMask, let backgroundMask = backgroundMask {
-      containerView?.addSubview(backgroundMask)
-      addOverlayView()
+    if shouldShowMask {
+      addBackgroundMask(to: containerView)
     }
     containerView?.addSubview(self)
 
@@ -135,9 +130,11 @@ public extension PopTip {
     }
   }
     
-  private func addOverlayView() {
+  private func addBackgroundMask(to targetView: UIView?) {
 
-    guard let backgroundMask = backgroundMask else { return }
+    guard let backgroundMask = backgroundMask, let targetView = targetView else { return }
+      
+    targetView.addSubview(backgroundMask)
 
     guard shouldCutoutMask else {
       backgroundMask.backgroundColor = maskColor

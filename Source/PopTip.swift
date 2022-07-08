@@ -582,7 +582,7 @@ open class PopTip: UIView {
       shapeMask.path = path.cgPath
         
       gradient.mask = shapeMask
-        layer.insertSublayer(gradient, at: 0)
+      layer.insertSublayer(gradient, at: 0)
     } else {
       bubbleColor.setFill()
       path.fill()
