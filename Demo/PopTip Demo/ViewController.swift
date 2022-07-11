@@ -40,10 +40,11 @@ class ViewController: UIViewController {
     popTip.shouldDismissOnTapOutside = true
     popTip.shouldDismissOnSwipeOutside = true
     popTip.shouldConsiderCutoutTapSeparately = true
-    popTip.edgeMargin = 5
-    popTip.offset = 2
+    popTip.edgeMargin = 8
+    popTip.padding = 8
+    popTip.offset = 8
     popTip.bubbleOffset = 0
-    popTip.edgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+    popTip.edgeInsets = .zero
     popTip.cutoutPathGenerator = { from in
       let length = (from.width < from.height ? from.width : from.height)
       let rect = CGRect(x: (from.minX + from.width / 2) - (length/2), y: (from.minY + from.height / 2) - (length/2), width: length, height: length)
@@ -60,7 +61,7 @@ class ViewController: UIViewController {
 //    popTip.shadowOffset = CGSize(width: 1, height: 1)
 //    popTip.shadowColor = .black
     
-    popTip.actionAnimation = .bounce(8)
+//    popTip.actionAnimation = .bounce(8)
 //    popTip.actionAnimation = .pulse(1.1)
 
     popTip.tapHandler = { _ in
@@ -107,11 +108,28 @@ class ViewController: UIViewController {
       popTip.shouldCutoutMask = false
     }
     
+    popTip.bubbleLayerGenerator = { path in
+      guard button == .bottomLeft else { return nil } // Only use bubbleLayer when button is bottomLeft
+      
+      let gradient = CAGradientLayer()
+      gradient.frame = path.bounds
+      gradient.colors = [UIColor.black.withAlphaComponent(0.4).cgColor, UIColor.black.withAlphaComponent(0.3)]
+      gradient.locations = [0, 1]
+      gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
+      gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
+        
+      let shapeMask = CAShapeLayer()
+      shapeMask.path = path.cgPath
+      gradient.mask = shapeMask
+      
+      return gradient
+    }
+    
     switch button {
     case .topLeft:
       popTip.bubbleColor = UIColor(red: 0.95, green: 0.65, blue: 0.21, alpha: 1)
       popTip.cornerRadius = 10
-      if !showSwiftUIView {
+      if false { // }!showSwiftUIView {
         let customView = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 120))
         let imageView = UIImageView(image: UIImage(named: "comment"))
         imageView.frame = CGRect(x: (80 - imageView.frame.width) / 2, y: 0, width: imageView.frame.width, height: imageView.frame.height)
@@ -159,6 +177,7 @@ class ViewController: UIViewController {
       let underline: [NSAttributedString.Key: Any] = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 13), NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
       let attributedText = NSMutableAttributedString(string: "I'm presenting a string ", attributes: attributes)
       attributedText.append(NSAttributedString(string: "with attributes!", attributes: underline))
+      attributedText.append(NSAttributedString(string: " And custom background!", attributes: attributes))
       popTip.show(attributedText: attributedText, direction: .up, maxWidth: 200, in: view, from: sender.frame)
       
     case .bottomRight:

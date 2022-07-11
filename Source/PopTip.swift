@@ -116,18 +116,10 @@ open class PopTip: UIView {
   @objc open dynamic var textColor = UIColor.white
   /// The `NSTextAlignment` of the text
   @objc open dynamic var textAlignment = NSTextAlignment.center
-  /// The `UIColor` for the poptip's background
+  /// The `UIColor` for the poptip's background. If `bubbleLayer` is specificed, this will be ignored
   @objc open dynamic var bubbleColor = UIColor.red
-  /// The `BOOL` that determines whether the gradient properties will be used, or the solid fill (`bubbleColor`)
-  @objc open dynamic var useGraientBackground = false
-  /// The list of colors to use within the gradient (should have same amount of values as `gradientLocations`)
-  @objc open dynamic var gradientColors: [UIColor] = [UIColor.black.withAlphaComponent(0.4), UIColor.black.withAlphaComponent(0.3)]
-  /// The list of locations  to use within the gradient (should have same amount of values as `gradientColors`)
-  @objc open dynamic var gradientLocations: [NSNumber] = [0, 1]
-  /// The `CGPoint` for the gradient background start
-  open dynamic var gradientStartPoint: CGPoint = CGPoint(x: 0.5, y: 0.0)
-  /// The `CGPoint` for the gradient background end
-  open dynamic var gradientEndPoint: CGPoint = CGPoint(x: 0.5, y: 1.0)
+  /// The `CALayer` generator closure for poptip's sublayer 0. If nil, the bubbleColor will be used as solid fill
+  @objc open dynamic var bubbleLayerGenerator: ((_ path: UIBezierPath) -> CALayer?)?
   /// The `UIColor` for the poptip's border
   @objc open dynamic var borderColor = UIColor.clear
   /// The width for the poptip's border
@@ -269,7 +261,11 @@ open class PopTip: UIView {
   fileprivate var customView: UIView?
   fileprivate var hostingController: UIViewController?
   fileprivate var isApplicationInBackground: Bool?
-  fileprivate var gradientLayer: CAGradientLayer?
+  fileprivate var bubbleLayer: CALayer? {
+    willSet {
+      bubbleLayer?.removeFromSuperlayer()
+    }
+  }
   fileprivate var label: UILabel = {
     let label = UILabel()
     label.numberOfLines = 0
@@ -564,26 +560,11 @@ open class PopTip: UIView {
     layer.shadowOffset = shadowOffset
     layer.shadowColor = shadowColor.cgColor
 
-    if useGraientBackground {
-      if let gradientLayer = gradientLayer {
-        gradientLayer.removeFromSuperlayer()
-        self.gradientLayer = nil
-      }
-        
-      let gradient = CAGradientLayer()
-      self.gradientLayer = gradient
-      gradient.frame = path.bounds
-      gradient.colors = gradientColors.map { $0.cgColor }
-      gradient.locations = gradientLocations
-      gradient.startPoint = gradientStartPoint
-      gradient.endPoint = gradientEndPoint
-        
-      let shapeMask = CAShapeLayer()
-      shapeMask.path = path.cgPath
-        
-      gradient.mask = shapeMask
-      layer.insertSublayer(gradient, at: 0)
+    if let bubbleLayerGenerator = self.bubbleLayerGenerator, let bubbleLayer = bubbleLayerGenerator(path) {
+      self.bubbleLayer = bubbleLayer
+      layer.insertSublayer(bubbleLayer, at: 0)
     } else {
+      bubbleLayer = nil
       bubbleColor.setFill()
       path.fill()
     }
@@ -775,6 +756,7 @@ open class PopTip: UIView {
       self.hostingController?.removeFromParent()
       self.customView = nil
       self.dismissActionAnimation()
+      self.bubbleLayer = nil
       self.backgroundMask?.removeFromSuperview()
       self.backgroundMask?.subviews.forEach { $0.removeFromSuperview() }
       self.removeFromSuperview()
